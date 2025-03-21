@@ -1,22 +1,26 @@
-import {useState,useEffect} from 'react'
+import { useState, useEffect } from "react";
 
-const PREFIX = 'codepen-clone'
-export default function useLocalStorage(key,initialValue) {
-    const prefixedKey = PREFIX + key
+const PREFIX = "codepen-clone-";
 
-    const [value , setValue] =useState(() => {
-        const jsonValue = localStorage.getItem(prefixedKey)
-        if (jsonValue != null) return JSON.parse(jsonValue)
+export default function useLocalStorage(key, initialValue) {
+  const prefixedKey = PREFIX + key;
+  
+  console.log("Loading key:", prefixedKey); // 🔴 Debugging Log
 
-        if (typeof initialValue ==='function') {
-            return initialValue()
-        } else {
-            return initialValue
-        }
-    })
+  const [value, setValue] = useState(() => {
+    const jsonValue = localStorage.getItem(prefixedKey);
+    try {
+      return jsonValue ? JSON.parse(jsonValue) : (typeof initialValue === "function" ? initialValue() : initialValue);
+    } catch (error) {
+      console.error("❌ Error parsing JSON from localStorage:", error);
+      return typeof initialValue === "function" ? initialValue() : initialValue;
+    }
+  });
 
-    useEffect (()  => {
-        localStorage.setItem(prefixedKey, JSON.stringify(value))
-    }, [prefixedKey , value])
-  return [value,setValue]
+  useEffect(() => {
+    console.log("Saving to localStorage:", prefixedKey, JSON.stringify(value)); // 🔴 Debugging Log
+    localStorage.setItem(prefixedKey, JSON.stringify(value));
+  }, [prefixedKey, value]);
+
+  return [value, setValue];
 }
